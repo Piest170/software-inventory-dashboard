@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="fade-in" style="max-width: 900px; margin: 0 auto;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: #ffffff; text-shadow: 0 0 20px var(--cyber-cyan);">
+      REGISTER SOFTWARE
+    </h1>
+    <div class="text-muted" style="font-family: 'Orbitron', sans-serif; font-size: 0.9rem;">
+      <span class="pulse" style="color: var(--cyber-cyan);">●</span> NEW ENTRY
+    </div>
+  </div>
+
+  <!-- Success/Error Message -->
+  {% if message %}
+  <div class="card mb-4 fade-in {% if message_type == 'success' %}border-success{% else %}border-error{% endif %}">
+    <div class="card-body">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 1.1rem;" class="{% if message_type == 'success' %}text-success-custom{% else %}text-error-custom{% endif %}">
+        {{ message }}
+      </div>
+      {% if message_type == 'success' and submitted %}
+      <div class="mt-3" style="color: var(--steel-gray); font-size: 0.95rem;">
+        <strong style="color: var(--cyber-cyan);">ข้อมูลที่บันทึก:</strong>
+        <ul class="mt-2 mb-0">
+          <li><strong>Name:</strong> {{ submitted.name }}</li>
+          <li><strong>Vendor:</strong> {{ submitted.vendor }}</li>
+          <li><strong>Version:</strong> {{ submitted.version }}</li>
+          <li><strong>Category:</strong> {{ submitted.category }}</li>
+          <li><strong>OS:</strong> {{ submitted.operating_system }}</li>
+          {% if submitted.install_location %}<li><strong>Location:</strong> {{ submitted.install_location }}</li>{% endif %}
+          {% if submitted.ip_address %}<li><strong>IP:</strong> {{ submitted.ip_address }}</li>{% endif %}
+        </ul>
+      </div>
+      <div class="mt-4 d-flex gap-3">
+        <a href="/" class="btn btn-cyber">Dashboard</a>
+        <a href="/register" class="btn btn-outline-cyber">เพิ่มรายการใหม่</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Register Form - ซ่อนเมื่อ submit สำเร็จ -->
+  {% if not (message and message_type == 'success') %}
+  <div class="card hud-corner fade-in">
+    <div class="card-body">
+      <h2 class="h4 mb-4" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--cyber-cyan);">
+        Software Details
+      </h2>
+
+      <form method="post" action="/register" id="registerForm">
+        <div class="row g-4">
+          <!-- Name -->
+          <div class="col-md-6">
+            <label class="form-label" style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyber-cyan);">
+              Software Name <span style="color: #ff4757;">*</span>
+            </label>
+            <input type="text" name="name" class="form-control" required placeholder="เช่น Apache HTTP Server" style="font-size: 1.1rem;">
+          </div>
+
+          <!-- Vendor -->
+          <div class="col-md-6">
+            <label class="form-label" style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyber-cyan);">
+              Vendor / Publisher <span style="color: #ff4757;">*</span>
+            </label>
+            <input type="text" name="vendor" class="form-control" required placeholder="เช่น Apache Software Foundation">
+          </div>
+
+          <!-- Version -->
+          <div class="col-md-4">
+            <label class="form-label" style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyber-cyan);">
+              Version <span style="color: #ff4757;">*</span>
+            </label>
+            <input type="text" name="version" class="form-control" required placeholder="เช่น 2.4.54">
+          </div>
+
+          <!-- Category -->
+          <div class="col-md-4">
+            <label class="form-label" style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyber-cyan);">
+              Category <span style="color: #ff4757;">*</span>
+            </label>
+            <select name="category" class="form-select" required>
+              <option value="">-- เลือกหมวดหมู่ --</option>
+              <option value="Web Server">Web Server</option>
+              <option value="Database">Database</option>
+              <option value="Runtime">Runtime</option>
+              <option value="Framework">Framework</option>
+              <option value="Library">Library</option>
+              <option value="CMS">CMS</option>
+              <option value="DevOps">DevOps</option>
+              <option value="Security">Security</option>
+              <option value="Messaging">Messaging</option>
+              <option value="Search">Search</option>
+              <option value="Infrastructure">Infrastructure</option>
+              <option value="Monitoring">Monitoring</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Operating System -->
+          <div class="col-md-4">
+            <label class="form-label" style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyber-cyan);">
+              Operating System <span style="color: #ff4757;">*</span>
+            </label>
+            <select name="operating_system" class="form-select" required>
+              <option value="">-- เลือก OS --</option>
+              <option value="Windows 11">Windows 11</option>
+              <option value="Windows 10">Windows 10</option>
+              <option value="Windows Server 2022">Windows Server 2022</option>
+              <option value="Windows Server 2019">Windows Server 2019</option>
+              <option value="Linux">Linux</option>
+              <option value="Ubuntu">Ubuntu</option>
+              <option value="CentOS">CentOS</option>
+              <option value="macOS">macOS</option>
+              <option value="Cloud">Cloud</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Install Location -->
+          <div class="col-md-6">
+            <label class="form-label" style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyber-cyan);">
+              Install Location
+            </label>
+            <input type="text" name="install_location" class="form-control" placeholder="เช่น C:\Program Files\Apache หรือ /opt/apache">
+          </div>
+
+          <!-- IP Address -->
+          <div class="col-md-6">
+            <label class="form-label" style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--cyber-cyan);">
+              IP Address
+            </label>
+            <input type="text" name="ip_address" class="form-control" placeholder="เช่น 192.168.1.100" style="font-family: 'Orbitron', sans-serif;">
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <hr style="border-color: var(--cyber-cyan); margin: 2rem 0; opacity: 0.3;">
+
+              <!-- Preview Section -->
+        <div class="mb-4">
+          <h3 class="h5 mb-3" style="font-family: 'Orbitron', sans-serif; color: var(--cyber-cyan);">
+            Live Preview
+          </h3>
+          <div class="card" style="background: rgba(17, 17, 17, 0.6); border: 1px dashed var(--steel-gray);">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div style="color: #ffffff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Name</div>
+                  <div id="preview-name" style="font-size: 1.2rem; font-weight: 600; color: #c9c5c5;">-</div>
+                </div>
+                <div class="col-md-6">
+                  <div style="color: #ffffff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Vendor</div>
+                  <div id="preview-vendor" style="font-size: 1.1rem; color: #c9c5c5;">-</div>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <div style="color: #ffffff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Version</div>
+                  <div id="preview-version" style="font-size: 1.1rem; color: #c9c5c5;">-</div>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <div style="color: #ffffff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Category</div>
+                  <div id="preview-category" style="font-size: 1.1rem; color: #c9c5c5;">-</div>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <div style="color: #ffffff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">OS</div>
+                  <div id="preview-os" style="font-size: 1.1rem; color: #c9c5c5;">-</div>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <div style="color: #ffffff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Location</div>
+                  <div id="preview-location" style="font-size: 1rem; color: #c9c5c5;">-</div>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <div style="color: #ffffff; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">IP Address</div>
+                  <div id="preview-ip" style="font-size: 1rem; font-family: 'Orbitron', sans-serif; color: #c9c5c5;">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-end gap-3">
+          <button type="reset" class="btn btn-outline-cyber" onclick="resetPreview()">
+            Clear Form
+          </button>
+          <button type="submit" class="btn btn-cyber" id="approveBtn" onclick="return confirmApprove()">
+            Approve & Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+  // Live Preview Update
+  const fields = ['name', 'vendor', 'version', 'category', 'operating_system', 'install_location', 'ip_address'];
+  const previewMap = {
+    'name': 'preview-name',
+    'vendor': 'preview-vendor',
+    'version': 'preview-version',
+    'category': 'preview-category',
+    'operating_system': 'preview-os',
+    'install_location': 'preview-location',
+    'ip_address': 'preview-ip',
+  };
+
+  fields.forEach(field => {
+    const input = document.querySelector(`[name="${field}"]`);
+    if (input) {
+      input.addEventListener('input', () => {
+        const previewEl = document.getElementById(previewMap[field]);
+        if (previewEl) {
+          previewEl.textContent = input.value || '-';
+        }
+      });
+    }
+  });
+
+  function resetPreview() {
+    setTimeout(() => {
+      fields.forEach(field => {
+        const previewEl = document.getElementById(previewMap[field]);
+        if (previewEl) previewEl.textContent = '-';
+      });
+    }, 10);
+  }
+
+  function confirmApprove() {
+    const name = document.querySelector('[name="name"]').value.trim();
+    const vendor = document.querySelector('[name="vendor"]').value.trim();
+    const version = document.querySelector('[name="version"]').value.trim();
+
+    if (!name || !vendor || !version) {
+      alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบ (Name, Vendor, Version)');
+      return false;
+    }
+
+    return confirm(`ยืนยันการเพิ่ม Software:\n\nชื่อ: ${name}\nผู้ผลิต: ${vendor}\nเวอร์ชัน: ${version}\n\nกด OK เพื่อ Approve`);
+  }
+
+  // Form validation visual feedback
+  document.querySelectorAll('.form-control[required], .form-select[required]').forEach(input => {
+    input.addEventListener('blur', () => {
+      if (!input.value.trim()) {
+        input.style.borderColor = '#ff4757';
+        input.style.boxShadow = '0 0 10px rgba(255, 71, 87, 0.3)';
+      } else {
+        input.style.borderColor = '#2ed573';
+        input.style.boxShadow = '0 0 10px rgba(46, 213, 115, 0.3)';
+      }
+    });
+
+    input.addEventListener('input', () => {
+      if (input.value.trim()) {
+        input.style.borderColor = 'var(--cyber-cyan)';
+        input.style.boxShadow = '0 0 10px rgba(0, 243, 255, 0.3)';
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

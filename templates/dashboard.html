@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: #ffffff; text-shadow: 0 0 20px var(--cyber-cyan);">
+      SOFTWARE INVENTORY
+    </h1>
+    <div class="text-muted" style="font-family: 'Orbitron', sans-serif; font-size: 0.9rem;">
+      <span class="pulse" style="color: var(--cyber-cyan);">●</span> LIVE
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="stat-card primary hud-corner slide-in-left" style="animation-delay: 0.1s;">
+        <div class="stat-label">Software ทั้งหมด</div>
+        <div class="stat-value" data-target="{{ stats.total_software }}">{{ stats.total_software }}</div>
+      </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="stat-card info hud-corner slide-in-left" style="animation-delay: 0.2s;">
+        <div class="stat-label">CVE ทั้งหมด</div>
+        <div class="stat-value" data-target="{{ stats.total_cve }}">{{ stats.total_cve }}</div>
+      </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="stat-card danger hud-corner slide-in-left" style="animation-delay: 0.3s;">
+        <div class="stat-label">Critical CVE</div>
+        <div class="stat-value" data-target="{{ stats.critical_cve }}">{{ stats.critical_cve }}</div>
+      </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="stat-card warning hud-corner slide-in-left" style="animation-delay: 0.4s;">
+        <div class="stat-label">EOL แล้ว</div>
+        <div class="stat-value" data-target="{{ stats.eol_count }}">{{ stats.eol_count }}</div>
+      </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-sm-6">
+      <div class="stat-card secondary hud-corner slide-in-left" style="animation-delay: 0.5s;">
+        <div class="stat-label">ไม่ระบุ</div>
+        <div class="stat-value" data-target="{{ stats.not_specified_count }}">{{ stats.not_specified_count }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Form -->
+  <form method="get" action="/" class="card mb-4 fade-in">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <input type="text" name="q" class="form-control" placeholder="ค้นหาชื่อ / ผู้ผลิต / เวอร์ชัน" value="{{ q }}">
+        </div>
+        <div class="col-md-3">
+          <select name="severity" class="form-select">
+            <option value="">ความรุนแรงทั้งหมด</option>
+            <option value="CRITICAL" {% if severity == 'CRITICAL' %}selected{% endif %}>Critical</option>
+            <option value="HIGH" {% if severity == 'HIGH' %}selected{% endif %}>High</option>
+            <option value="MEDIUM" {% if severity == 'MEDIUM' %}selected{% endif %}>Medium</option>
+            <option value="LOW" {% if severity == 'LOW' %}selected{% endif %}>Low</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select name="eol" class="form-select">
+            <option value="">สถานะ EOL ทั้งหมด</option>
+            <option value="supported" {% if eol == 'supported' %}selected{% endif %}>ยังไม่ EOL</option>
+            <option value="eol" {% if eol == 'eol' %}selected{% endif %}>EOL แล้ว</option>
+            <option value="not_specified" {% if eol == 'not_specified' %}selected{% endif %}>ไม่ระบุ</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button type="submit" class="btn btn-cyber">ค้นหา</button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Software Table -->
+  <div class="card fade-in">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Software</th>
+              <th>Vendor</th>
+              <th>Version</th>
+              <th>OS</th>
+              <th>CVE</th>
+              <th>EOL</th>
+              <th>Last Scan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for software in softwares %}
+            <tr>
+              <td>
+                <a href="/software/{{ software.id }}">
+                  {{ software.name }}
+                </a>
+                <br>
+                <small>{{ software.category or '-' }}</small>
+              </td>
+              <td>{{ software.vendor or '-' }}</td>
+              <td>{{ software.version or '-' }}</td>
+              <td>{{ software.operating_system or '-' }}</td>
+              <td>
+                {% if software.cves %}
+                  <span class="badge badge-secondary">{{ software.cves|length }} CVE</span>
+                  {% for cve in software.cves[:3] %}
+                    {% set sev = (cve.severity or 'UNKNOWN')|upper %}
+                    {% if sev == 'CRITICAL' %}
+                      <span class="badge badge-danger">{{ cve.cve_id }}</span>
+                    {% elif sev == 'HIGH' %}
+                      <span class="badge badge-warning">{{ cve.cve_id }}</span>
+                    {% elif sev == 'MEDIUM' %}
+                      <span class="badge badge-blue">{{ cve.cve_id }}</span>
+                    {% else %}
+                      <span class="badge badge-secondary">{{ cve.cve_id }}</span>
+                    {% endif %}
+                  {% endfor %}
+                  {% if software.cves|length > 3 %}
+                    <span class="text-muted">+{{ software.cves|length - 3 }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge badge-success">ไม่มี CVE</span>
+                {% endif %}
+              </td>
+              <td>
+                {% set dated_eols = software.eols|selectattr('eol_date')|list %}
+                {% if dated_eols %}
+                  {% set latest_eol = dated_eols|sort(attribute='eol_date', reverse=true)|first %}
+                  {% if latest_eol.eol_date < today %}
+                    <span class="badge badge-danger">EOL {{ latest_eol.eol_date.strftime('%d/%m/%Y') }}</span>
+                  {% else %}
+                    <span class="badge badge-success">มี EOL</span>
+                  {% endif %}
+                {% else %}
+                  <span class="badge badge-secondary">ไม่ระบุ</span>
+                {% endif %}
+              </td>
+              <td>{{ software.last_scan_date.strftime('%d/%m/%Y') if software.last_scan_date else '-' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5">
+                <div style="color: var(--steel-gray); font-size: 1.2rem;">ไม่พบข้อมูล</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination.total_pages > 1 %}
+  <div class="d-flex justify-content-between align-items-center mt-4 fade-in">
+    <div class="text-muted" style="font-family: 'Rajdhani', sans-serif; font-size: 0.95rem;">
+      แสดง <span style="color: var(--cyber-cyan); font-weight: 600;">{{ pagination.start_item }}</span> - 
+      <span style="color: var(--cyber-cyan); font-weight: 600;">{{ pagination.end_item }}</span> 
+      จาก <span style="color: var(--cyber-cyan); font-weight: 600;">{{ pagination.total_items }}</span> รายการ
+      (หน้า <span style="color: var(--cyber-cyan); font-weight: 600;">{{ pagination.page }}</span> / {{ pagination.total_pages }})
+    </div>
+
+    <nav aria-label="Page navigation">
+      <ul class="pagination mb-0" style="list-style: none; display: flex; gap: 4px; padding: 0; margin: 0;">
+        <!-- Previous Button -->
+        {% if pagination.has_prev %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ pagination.prev_page }}&q={{ q }}&severity={{ severity }}&eol={{ eol }}" style="text-decoration: none; cursor: pointer;">
+            ← ก่อนหน้า
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link" style="cursor: not-allowed; opacity: 0.5;">← ก่อนหน้า</span>
+        </li>
+        {% endif %}
+
+        <!-- Page Numbers -->
+        {% for p in pagination.pages %}
+          {% if p == '...' %}
+            <li class="page-item disabled">
+              <span class="page-link" style="background: transparent; border: none; cursor: default;">...</span>
+            </li>
+          {% elif p == pagination.page %}
+            <li class="page-item active">
+              <span class="page-link" style="cursor: default;">{{ p }}</span>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ p }}&q={{ q }}&severity={{ severity }}&eol={{ eol }}" style="text-decoration: none; cursor: pointer;">{{ p }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Next Button -->
+        {% if pagination.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ pagination.next_page }}&q={{ q }}&severity={{ severity }}&eol={{ eol }}" style="text-decoration: none; cursor: pointer;">
+            ถัดไป →
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link" style="cursor: not-allowed; opacity: 0.5;">ถัดไป →</span>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+
+{% block scripts %}
+<script>
+  // Counter Animation on Load
+  document.addEventListener('DOMContentLoaded', () => {
+    const counters = document.querySelectorAll('.stat-value');
+    counters.forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'));
+      if (!isNaN(target)) {
+        animateCounter(counter, target, 2000);
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

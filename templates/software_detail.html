@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="fade-in">
+  <div class="mb-4">
+    <a href="/" class="btn btn-outline-cyber">
+      ← กลับหน้าหลัก
+    </a>
+  </div>
+
+  <!-- Software Header -->
+  <div class="card mb-4 hud-corner">
+    <div class="card-body">
+      <h1 class="h2 mb-4" style="font-family: 'Orbitron', sans-serif; font-weight: 700; text-shadow: 0 0 20px var(--cyber-cyan);">
+        {{ software.name }}
+      </h1>
+
+      <div class="row g-4">
+        <div class="col-md-3">
+          <div style="color: var(--steel-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">Vendor</div>
+          <div style="font-size: 1.2rem; font-weight: 600;">{{ software.vendor or '-' }}</div>
+        </div>
+        <div class="col-md-3">
+          <div style="color: var(--steel-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">Version</div>
+          <div style="font-size: 1.2rem; font-weight: 600;">{{ software.version or '-' }}</div>
+        </div>
+        <div class="col-md-3">
+          <div style="color: var(--steel-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">Category</div>
+          <div style="font-size: 1.2rem; font-weight: 600;">{{ software.category or '-' }}</div>
+        </div>
+        <div class="col-md-3">
+          <div style="color: var(--steel-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">Operating System</div>
+          <div style="font-size: 1.2rem; font-weight: 600;">{{ software.operating_system or '-' }}</div>
+        </div>
+        <div class="col-md-4">
+          <div style="color: var(--steel-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">Install Location</div>
+          <div style="font-size: 1.1rem;">{{ software.install_location or '-' }}</div>
+        </div>
+        <div class="col-md-4">
+          <div style="color: var(--steel-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">IP Address</div>
+          <div style="font-size: 1.1rem; font-family: 'Orbitron', sans-serif; color: var(--cyber-cyan);">{{ software.ip_address or '-' }}</div>
+        </div>
+        <div class="col-md-4">
+          <div style="color: var(--steel-gray); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; font-family: 'Orbitron', sans-serif;">Last Scan</div>
+          <div style="font-size: 1.1rem;">{{ software.last_scan_date.strftime('%d/%m/%Y') if software.last_scan_date else '-' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- CVE Section -->
+    <div class="col-lg-6">
+      <div class="card h-100 hud-corner fade-in">
+        <div class="card-body">
+          <h2 class="h4 mb-4" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--cyber-cyan);">
+            CVE <span style="color: var(--steel-gray); font-size: 0.9rem;">({{ software.cves|length }})</span>
+          </h2>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>CVE</th>
+                  <th>Severity</th>
+                  <th>CVSS</th>
+                  <th>Published</th>
+                  <th>Fixed Version</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cve in software.cves %}
+                {% set sev = (cve.severity or 'UNKNOWN')|upper %}
+                <tr>
+                  <td style="font-family: 'Orbitron', sans-serif; font-size: 0.9rem;">{{ cve.cve_id }}</td>
+                  <td>
+                    {% if sev == 'CRITICAL' %}
+                      <span class="badge badge-danger">CRITICAL</span>
+                    {% elif sev == 'HIGH' %}
+                      <span class="badge badge-warning">HIGH</span>
+                    {% elif sev == 'MEDIUM' %}
+                      <span class="badge badge-blue">MEDIUM</span>
+                    {% elif sev == 'LOW' %}
+                      <span class="badge badge-success">LOW</span>
+                    {% else %}
+                      <span class="badge badge-secondary">{{ sev }}</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-weight: 600;">{{ cve.cvss_score if cve.cvss_score is not none else '-' }}</td>
+                  <td>{{ cve.published_date.strftime('%d/%m/%Y') if cve.published_date else '-' }}</td>
+                  <td style="color: var(--cyber-cyan);">{{ cve.fixed_version or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="5" class="text-center py-4" style="color: var(--steel-gray);">ไม่มี CVE</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EOL Section -->
+    <div class="col-lg-6">
+      <div class="card h-100 hud-corner fade-in">
+        <div class="card-body">
+          <h2 class="h4 mb-4" style="font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--cyber-cyan);">
+            EOL <span style="color: var(--steel-gray); font-size: 0.9rem;">({{ software.eols|length }})</span>
+          </h2>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Version</th>
+                  <th>Release Date</th>
+                  <th>EOL Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for eol in software.eols %}
+                <tr>
+                  <td style="font-weight: 600;">{{ eol.version or '-' }}</td>
+                  <td>{{ eol.release_date.strftime('%d/%m/%Y') if eol.release_date else '-' }}</td>
+                  <td>
+                    {% if eol.eol_date %}
+                      {% if eol.eol_date < today %}
+                        <span class="badge badge-danger">{{ eol.eol_date.strftime('%d/%m/%Y') }}</span>
+                      {% else %}
+                        <span class="badge badge-success">{{ eol.eol_date.strftime('%d/%m/%Y') }}</span>
+                      {% endif %}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                  <td style="color: var(--steel-gray);">{{ eol.status or '-' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="4" class="text-center py-4" style="color: var(--steel-gray);">ไม่มีข้อมูล EOL</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
